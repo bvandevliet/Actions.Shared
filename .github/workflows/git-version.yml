@@ -1,0 +1,63 @@
+name: Execute GitVersion and create tag
+
+on:
+  workflow_call:
+    inputs:
+      createTag:
+        type: boolean
+        default: true
+    outputs:
+      majorMinorPatch:
+        value: ${{ jobs.gitversion.outputs.majorMinorPatch }}
+      preReleaseLabel:
+        value: ${{ jobs.gitversion.outputs.preReleaseLabel }}
+      semVer:
+        value: ${{ jobs.gitversion.outputs.semVer }}
+      assemblySemVer:
+        value: ${{ jobs.gitversion.outputs.assemblySemVer }}
+      assemblySemFileVer:
+        value: ${{ jobs.gitversion.outputs.assemblySemFileVer }}
+
+env:
+  IS_PUSH: ${{ github.event_name == 'push' }}
+  IS_MAIN: ${{ github.event.repository.default_branch == github.ref_name }}
+
+jobs:
+  gitversion:
+    name: Execute GitVersion and create tag
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      majorMinorPatch: ${{ steps.gitversion.outputs.majorMinorPatch }}
+      preReleaseLabel: ${{ steps.gitversion.outputs.preReleaseLabel }}
+      semVer: ${{ steps.gitversion.outputs.semVer }}
+      assemblySemVer: ${{ steps.gitversion.outputs.assemblySemVer }}
+      assemblySemFileVer: ${{ steps.gitversion.outputs.assemblySemFileVer }}
+    steps:
+      -
+        name: Unshallow checkout
+        uses: actions/checkout@main
+        with:
+          fetch-depth: 0
+      -
+        name: Setup GitVersion
+        uses: gittools/actions/gitversion/setup@v3
+        with:
+          versionSpec: '6.0.x'
+      -
+        name: Execute GitVersion
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v3
+      -
+        name: Create Git tag
+        if: inputs.createTag && env.IS_PUSH == 'true'
+        continue-on-error: true
+        run: |
+          if [ "${{ env.IS_MAIN }}" == "true" ]; then
+            git tag v${{ steps.gitversion.outputs.majorMinorPatch }}
+            git push origin v${{ steps.gitversion.outputs.majorMinorPatch }}
+          else
+            git tag v${{ steps.gitversion.outputs.semVer }}
+            git push origin v${{ steps.gitversion.outputs.semVer }}
+          fi

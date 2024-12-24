@@ -1,0 +1,64 @@
+name: Dotnet analysis
+
+on:
+  workflow_call:
+
+env:
+  IS_PUSH: ${{ github.event_name == 'push' }}
+  IS_MAIN: ${{ github.event.repository.default_branch == github.ref_name }}
+
+jobs:
+  analysis:
+    name: Run code analysis and tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+      actions: read
+      security-events: write
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@main
+      -
+        name: Initialize CodeQL
+        if: env.IS_PUSH == 'true'
+        uses: github/codeql-action/init@v3
+        with:
+          languages: csharp
+          build-mode: none
+      -
+        name: Perform CodeQL analysis
+        if: env.IS_PUSH == 'true'
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:csharp"
+      -
+        name: Setup dotnet
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8'
+      -
+        name: Restore NuGet packages
+        run: dotnet restore
+      -
+        name: Generate Trivy vulnerability report
+        uses: aquasecurity/trivy-action@master
+        env:
+          TRIVY_SKIP_DB_UPDATE: true
+          TRIVY_SKIP_JAVA_DB_UPDATE: true
+        with:
+          scan-type: 'fs'
+          severity: 'HIGH,CRITICAL'
+          ignore-unfixed: true
+          format: 'sarif'
+          output: 'trivy-fs.sarif'
+          exit-code: 0
+      -
+        name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-fs.sarif'
+      -
+        name: Run all tests
+        run: dotnet test -c Debug --no-restore --verbosity normal

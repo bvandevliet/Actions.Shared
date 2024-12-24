@@ -21,10 +21,9 @@ on:
       assemblySemFileVer:
         type: string
         required: true
-      CR_REGISTRIES:
+      CR_REGISTRY:
         type: string
-        default: |
-          ghcr.io/${{ github.repository_owner }}
+        default: ghcr.io/${{ github.repository_owner }}
     secrets:
       CR_USERNAME:
         required: true
@@ -46,16 +45,12 @@ jobs:
         name: Checkout
         uses: actions/checkout@main
       -
-        name: Get list of images to build
-        id: images
-        run: echo "list=$(echo "${{ inputs.CR_REGISTRIES }}" | tr ',' '\n' | sed "s|$|/${{ inputs.PROJECT }}|")" >> $GITHUB_OUTPUT
-      -
         name: Docker metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: |
-            ${{ steps.images.outputs.list }}
+            ${{ inputs.CR_REGISTRY }}/${{ inputs.PROJECT }}
           tags: |
             type=schedule,pattern=nightly
             type=raw,enable=${{ env.IS_PUSH == 'true' && env.IS_MAIN == 'true' }},value=nightly
@@ -124,7 +119,7 @@ jobs:
         if: steps.meta.outputs.tags != ''
         uses: docker/login-action@v3
         with:
-          registry: ${{ inputs.CR_REGISTRIES }}
+          registry: ${{ inputs.CR_REGISTRY }}
           username: ${{ secrets.CR_USERNAME }}
           password: ${{ secrets.CR_PASSWORD }}
       -

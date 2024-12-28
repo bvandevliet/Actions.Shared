@@ -3,7 +3,13 @@ name: Docker build and push
 on:
   workflow_call:
     inputs:
+      CR_REGISTRY:
+        type: string
+        default: docker.io
       PROJECT:
+        type: string
+        required: true
+      IMAGE_NAME:
         type: string
         required: true
       majorMinorPatch:
@@ -21,9 +27,6 @@ on:
       assemblySemFileVer:
         type: string
         required: true
-      CR_REGISTRY:
-        type: string
-        default: ghcr.io/${{ github.repository_owner }}
     secrets:
       CR_USERNAME:
         required: true
@@ -50,7 +53,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            ${{ inputs.CR_REGISTRY }}/${{ inputs.PROJECT }}
+            ${{ inputs.CR_REGISTRY }}/${{ inputs.IMAGE_NAME }}
           tags: |
             type=schedule,pattern=nightly
             type=raw,enable=${{ env.IS_PUSH == 'true' && env.IS_MAIN == 'true' }},value=nightly

@@ -6,6 +6,7 @@ on:
       createTag:
         type: boolean
         default: true
+        description: Set to false to skip creating a tag and pushing it to the Git repository.
     outputs:
       majorMinorPatch:
         value: ${{ jobs.gitversion.outputs.majorMinorPatch }}

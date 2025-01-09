@@ -6,32 +6,42 @@ on:
       CR_REGISTRY:
         type: string
         default: docker.io
+        description: The container registry to push the image to.
       PROJECT:
         type: string
         required: true
+        description: The name of the .csproj file, expected to exist in an equally named folder in the root of the repository.
       IMAGE_NAME:
         type: string
         required: true
+        description: The name of the image to be built and pushed, format is registry_owner/image_name.
       majorMinorPatch:
         type: string
         required: true
+        description: The major.minor.patch version of the image, you can use the git-version.yml workflow template to generate this.
       preReleaseLabel:
         type: string
         required: true
+        description: The pre-release label of the image, you can use the git-version.yml workflow template to generate this.
       semVer:
         type: string
         required: true
+        description: The semantic version of the image, you can use the git-version.yml workflow template to generate this.
       assemblySemVer:
         type: string
         required: true
+        description: The assembly semantic version of the image, you can use the git-version.yml workflow template to generate this.
       assemblySemFileVer:
         type: string
         required: true
+        description: The assembly semantic file version of the image, you can use the git-version.yml workflow template to generate this.
     secrets:
       CR_USERNAME:
         required: true
+        description: The username to authenticate with the container registry.
       CR_PASSWORD:
         required: true
+        description: The password to authenticate with the container registry.
 
 env:
   IS_PUSH: ${{ github.event_name == 'push' }}

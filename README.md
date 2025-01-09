@@ -2,7 +2,7 @@
 Reusable workflows.
 
 ## Example
-So far, primarily used to test, build and push .net core projects to a Docker container registry.
+So far, primarily used to test, build and push (dotnet core) projects to a Docker container registry.
 ```yaml
 name: Docker publish
 
@@ -44,7 +44,7 @@ jobs:
           - my.project.2
     with:
       CR_REGISTRY: docker.io
-      PROJECT: ${{ matrix.project }}
+      CSPROJ_NAME: ${{ matrix.project }}
       IMAGE_NAME: ${{ github.repository_owner }}/${{ matrix.project }}
       majorMinorPatch: ${{ needs.gitversion.outputs.majorMinorPatch }}
       preReleaseLabel: ${{ needs.gitversion.outputs.preReleaseLabel }}

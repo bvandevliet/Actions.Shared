@@ -7,10 +7,15 @@ on:
         type: string
         default: docker.io
         description: The container registry to push the image to.
-      PROJECT:
+      CSPROJ_NAME:
         type: string
-        required: true
-        description: The name of the .csproj file, expected to exist in an equally named folder in the root of the repository.
+        description: |
+          The name of the .csproj file, expected to exist in an equally named folder in the root of the repository.
+          Leave empty to skip dotnet build steps before building the image from the Dockerfile, e.g. for non-dotnet projects.
+      DOTNET_VERSION:
+        type: string
+        default: '8'
+        description: The version of the dotnet SDK, see https://github.com/actions/setup-dotnet/tree/v4/#supported-version-syntax.
       IMAGE_NAME:
         type: string
         required: true
@@ -73,15 +78,15 @@ jobs:
             type=raw,enable=${{ env.IS_PUSH == 'false' || env.IS_MAIN == 'false' }},value=${{ inputs.semVer }}
       -
         name: Setup dotnet
-        if: steps.meta.outputs.tags != ''
+        if: steps.meta.outputs.tags != '' && inputs.CSPROJ_NAME != ''
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8'
+          dotnet-version: ${{ inputs.DOTNET_VERSION }}
       -
-        name: Build ${{ inputs.PROJECT }}
-        if: steps.meta.outputs.tags != ''
+        name: Dotnet build ${{ inputs.CSPROJ_NAME }}
+        if: steps.meta.outputs.tags != '' && inputs.CSPROJ_NAME != ''
         run: |
-          dotnet publish "${{ inputs.PROJECT }}/${{ inputs.PROJECT }}.csproj" \
+          dotnet publish "${{ inputs.CSPROJ_NAME }}/${{ inputs.CSPROJ_NAME }}.csproj" \
           -c Release /p:UseAppHost=false \
           /p:Version=${{ inputs.semVer }} \
           /p:AssemblyVersion=${{ inputs.assemblySemVer }} \
@@ -94,11 +99,11 @@ jobs:
         with:
           platforms: linux/amd64,linux/arm64
       -
-        name: Build image for ${{ inputs.PROJECT }}
+        name: Build image for ${{ inputs.CSPROJ_NAME }}
         if: steps.meta.outputs.tags != ''
         uses: docker/build-push-action@v6
         with:
-          context: ./${{ inputs.PROJECT }}
+          context: ./${{ inputs.CSPROJ_NAME }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           load: true
@@ -136,11 +141,11 @@ jobs:
           username: ${{ secrets.CR_USERNAME }}
           password: ${{ secrets.CR_PASSWORD }}
       -
-        name: Push ${{ inputs.PROJECT }} to registry
+        name: Push ${{ inputs.CSPROJ_NAME }} to registry
         if: steps.meta.outputs.tags != ''
         uses: docker/build-push-action@v6
         with:
-          context: ./${{ inputs.PROJECT }}
+          context: ./${{ inputs.CSPROJ_NAME }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: ${{ steps.buildx.outputs.platforms }}

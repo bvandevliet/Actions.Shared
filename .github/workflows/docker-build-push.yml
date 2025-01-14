@@ -6,7 +6,7 @@ on:
       CR_REGISTRY:
         type: string
         default: docker.io
-        description: The container registry to push the image to.
+        description: The container registry to authenticate with.
       CSPROJ_NAME:
         type: string
         description: |
@@ -19,7 +19,7 @@ on:
       IMAGE_NAME:
         type: string
         required: true
-        description: The name of the image to be built and pushed, format is registry_owner/image_name.
+        description: The full name of the image to be built and pushed, format should be registry/(owner)/image_name.
       majorMinorPatch:
         type: string
         required: true

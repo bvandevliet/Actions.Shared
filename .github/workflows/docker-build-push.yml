@@ -68,7 +68,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            ${{ inputs.CR_REGISTRY }}/${{ inputs.IMAGE_NAME }}
+            ${{ inputs.IMAGE_NAME }}
           tags: |
             type=schedule,pattern=nightly
             type=raw,enable=${{ env.IS_PUSH == 'true' && env.IS_MAIN == 'true' }},value=nightly

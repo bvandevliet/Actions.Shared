@@ -26,21 +26,13 @@ jobs:
         uses: github/codeql-action/init@v3
         with:
           languages: csharp
-          build-mode: autobuild
+          build-mode: none
       -
         name: Perform CodeQL analysis
         if: env.IS_PUSH == 'true'
         uses: github/codeql-action/analyze@v3
         with:
           category: "/language:csharp"
-      -
-        name: Setup dotnet
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8'
-      -
-        name: Restore NuGet packages
-        run: dotnet restore
       -
         name: Generate Trivy vulnerability report
         uses: aquasecurity/trivy-action@master
@@ -59,6 +51,14 @@ jobs:
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: 'trivy-fs.sarif'
+      -
+        name: Setup dotnet
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8'
+      -
+        name: Restore NuGet packages
+        run: dotnet restore
       -
         name: Run all tests
         run: dotnet test -c Debug --no-restore --verbosity normal

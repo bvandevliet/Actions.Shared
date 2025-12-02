@@ -69,11 +69,11 @@ jobs:
             ${{ inputs.IMAGE_NAME }}
           tags: |
             type=schedule,pattern=nightly
-            type=raw,enable=${{ env.IS_PUSH == 'true' && env.IS_MAIN == 'true' }},value=nightly
-            type=raw,enable=${{ env.IS_PUSH == 'true' && env.IS_MAIN == 'true' }},value=latest
-            type=raw,enable=${{ env.IS_PUSH == 'true' && env.IS_MAIN == 'true' }},value=${{ inputs.majorMinorPatch }}
-            type=raw,enable=${{ env.IS_PUSH == 'false' || env.IS_MAIN == 'false' }},value=${{ inputs.preReleaseLabel }}
-            type=raw,enable=${{ env.IS_PUSH == 'false' || env.IS_MAIN == 'false' }},value=${{ inputs.semVer }}
+            type=raw,enable=${{ env.IS_MAIN == 'true' }},value=nightly
+            type=raw,enable=${{ env.IS_MAIN == 'true' }},value=latest
+            type=raw,enable=${{ env.IS_MAIN == 'true' }},value=${{ inputs.majorMinorPatch }}
+            type=raw,enable=${{ env.IS_MAIN == 'false' }},value=${{ inputs.preReleaseLabel }}
+            type=raw,enable=${{ env.IS_MAIN == 'false' }},value=${{ inputs.semVer }}
       - name: Setup dotnet
         if: steps.meta.outputs.tags != '' && inputs.CSPROJ_NAME != ''
         uses: actions/setup-dotnet@v4

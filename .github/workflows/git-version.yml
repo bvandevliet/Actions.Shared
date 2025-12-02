@@ -48,7 +48,7 @@ jobs:
         id: gitversion
         uses: gittools/actions/gitversion/execute@v3
       - name: Create Git tag
-        if: inputs.createTag && env.IS_PUSH == 'true'
+        if: inputs.createTag
         continue-on-error: true
         run: |
           if [ "${{ env.IS_MAIN }}" == "true" ]; then

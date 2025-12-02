@@ -36,22 +36,18 @@ jobs:
       assemblySemVer: ${{ steps.gitversion.outputs.assemblySemVer }}
       assemblySemFileVer: ${{ steps.gitversion.outputs.assemblySemFileVer }}
     steps:
-      -
-        name: Unshallow checkout
+      - name: Unshallow checkout
         uses: actions/checkout@main
         with:
           fetch-depth: 0
-      -
-        name: Setup GitVersion
+      - name: Setup GitVersion
         uses: gittools/actions/gitversion/setup@v3
         with:
-          versionSpec: '6.0.x'
-      -
-        name: Execute GitVersion
+          versionSpec: "6.0.x"
+      - name: Execute GitVersion
         id: gitversion
         uses: gittools/actions/gitversion/execute@v3
-      -
-        name: Create Git tag
+      - name: Create Git tag
         if: inputs.createTag && env.IS_PUSH == 'true'
         continue-on-error: true
         run: |

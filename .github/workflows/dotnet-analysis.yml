@@ -17,48 +17,40 @@ jobs:
       actions: read
       security-events: write
     steps:
-      -
-        name: Checkout
+      - name: Checkout
         uses: actions/checkout@main
-      -
-        name: Initialize CodeQL
+      - name: Initialize CodeQL
         if: env.IS_PUSH == 'true'
         uses: github/codeql-action/init@v3
         with:
           languages: csharp
           build-mode: none
-      -
-        name: Perform CodeQL analysis
+      - name: Perform CodeQL analysis
         if: env.IS_PUSH == 'true'
         uses: github/codeql-action/analyze@v3
         with:
           category: "/language:csharp"
-      -
-        name: Generate Trivy vulnerability report
+      - name: Generate Trivy vulnerability report
         uses: aquasecurity/trivy-action@master
         env:
           TRIVY_SKIP_DB_UPDATE: true
           TRIVY_SKIP_JAVA_DB_UPDATE: true
         with:
-          scan-type: 'fs'
-          severity: 'HIGH,CRITICAL'
+          scan-type: "fs"
+          severity: "HIGH,CRITICAL"
           ignore-unfixed: true
-          format: 'sarif'
-          output: 'trivy-fs.sarif'
+          format: "sarif"
+          output: "trivy-fs.sarif"
           exit-code: 0
-      -
-        name: Upload Trivy scan results
+      - name: Upload Trivy scan results
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: 'trivy-fs.sarif'
-      -
-        name: Setup dotnet
+          sarif_file: "trivy-fs.sarif"
+      - name: Setup dotnet
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8'
-      -
-        name: Restore NuGet packages
+          dotnet-version: "8"
+      - name: Restore NuGet packages
         run: dotnet restore
-      -
-        name: Run all tests
+      - name: Run all tests
         run: dotnet test -c Debug --no-restore --verbosity normal

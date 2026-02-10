@@ -2,6 +2,11 @@ name: Dotnet analysis
 
 on:
   workflow_call:
+    inputs:
+      DOTNET_VERSION:
+        type: string
+        default: "8"
+        description: The version of the dotnet SDK, see https://github.com/actions/setup-dotnet/tree/v4/#supported-version-syntax.
 
 env:
   IS_PUSH: ${{ github.event_name == 'push' }}
@@ -49,7 +54,7 @@ jobs:
       - name: Setup dotnet
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: "8"
+          dotnet-version: ${{ inputs.DOTNET_VERSION }}
       - name: Restore NuGet packages
         run: dotnet restore
       - name: Run all tests

@@ -25,13 +25,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@main
       - name: Initialize CodeQL
-        if: env.IS_PUSH == 'true'
+        if: env.IS_PUSH == 'true' && github.actor != 'dependabot[bot]'
         uses: github/codeql-action/init@v3
         with:
           languages: csharp
           build-mode: none
       - name: Perform CodeQL analysis
-        if: env.IS_PUSH == 'true'
+        if: env.IS_PUSH == 'true' && github.actor != 'dependabot[bot]'
         uses: github/codeql-action/analyze@v3
         with:
           category: "/language:csharp"

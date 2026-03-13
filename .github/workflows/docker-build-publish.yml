@@ -68,7 +68,7 @@ jobs:
 
       - name: Docker metadata
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: |
             ${{ inputs.IMAGE_NAME }}
@@ -82,7 +82,7 @@ jobs:
 
       - name: Setup dotnet
         if: steps.meta.outputs.tags != '' && inputs.CSPROJ_NAME != ''
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ inputs.DOTNET_VERSION }}
 
@@ -98,13 +98,13 @@ jobs:
       - name: Set up Buildx
         id: buildx
         if: steps.meta.outputs.tags != ''
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
         with:
           platforms: linux/amd64,linux/arm64
 
       - name: Login to container registry
         if: steps.meta.outputs.tags != ''
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ${{ inputs.CR_REGISTRY }}
           username: ${{ secrets.CR_USERNAME }}
@@ -112,7 +112,7 @@ jobs:
 
       - name: Build and publish ${{ inputs.IMAGE_NAME }} to ${{ inputs.CR_REGISTRY }}
         if: steps.meta.outputs.tags != ''
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ./${{ inputs.CSPROJ_NAME }}
           tags: ${{ steps.meta.outputs.tags }}

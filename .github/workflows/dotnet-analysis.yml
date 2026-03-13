@@ -30,17 +30,17 @@ jobs:
         uses: actions/checkout@main
       - name: Initialize CodeQL
         if: env.IS_PUSH == 'true' && github.actor != 'dependabot[bot]'
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
           languages: csharp
           build-mode: none
       - name: Perform CodeQL analysis
         if: env.IS_PUSH == 'true' && github.actor != 'dependabot[bot]'
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
         with:
           category: "/language:csharp"
       - name: Setup dotnet
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ inputs.DOTNET_VERSION }}
       - name: Restore NuGet packages
@@ -60,7 +60,7 @@ jobs:
           exit-code: 0
       - name: Upload Trivy scan results
         if: inputs.skipTrivyScan != true
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: "trivy-fs.sarif"
       - name: Run all tests

@@ -23,34 +23,32 @@ permissions:
   security-events: write
 
 jobs:
-
   analysis:
     name: Run code analysis and tests
     uses: bvandevliet/Actions.Shared/.github/workflows/dotnet-analysis.yml@master
-
   gitversion:
     needs: [analysis]
     name: Execute GitVersion and create tag
     uses: bvandevliet/Actions.Shared/.github/workflows/git-version.yml@master
-
-  build-push:
+  build-publish:
     needs: [analysis,gitversion]
-    name: Build and push
-    uses: bvandevliet/Actions.Shared/.github/workflows/docker-build-push.yml@master
+    name: Build and publish
+    uses: bvandevliet/Actions.Shared/.github/workflows/docker-build-publish.yml@master
     strategy:
       matrix:
         project:
           - my.project.1
           - my.project.2
     with:
-      CR_REGISTRY: docker.io
       CSPROJ_NAME: ${{ matrix.project }}
+      DOTNET_VERSION: 10
       IMAGE_NAME: ${{ github.repository_owner }}/${{ matrix.project }}
       majorMinorPatch: ${{ needs.gitversion.outputs.majorMinorPatch }}
       preReleaseLabel: ${{ needs.gitversion.outputs.preReleaseLabel }}
       semVer: ${{ needs.gitversion.outputs.semVer }}
       assemblySemVer: ${{ needs.gitversion.outputs.assemblySemVer }}
       assemblySemFileVer: ${{ needs.gitversion.outputs.assemblySemFileVer }}
+      CR_REGISTRY: docker.io
     secrets:
       CR_USERNAME: ${{ secrets.CR_USERNAME }}
       CR_PASSWORD: ${{ secrets.CR_PASSWORD }}

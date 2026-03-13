@@ -1,15 +1,12 @@
-name: Docker build and push
+name: Docker build and publish
+description: Kept for back-compat; use the more accurately named docker-build-publish workflow instead.
 
 on:
   workflow_call:
     inputs:
-      CR_REGISTRY:
-        type: string
-        default: docker.io
-        description: The container registry to authenticate with.
       CSPROJ_NAME:
         type: string
-        description: |
+        description: >
           The name of the .csproj file, expected to exist in an equally named folder in the root of the repository.
           Leave empty to skip dotnet build steps before building the image from the Dockerfile, e.g. for non-dotnet projects.
       DOTNET_VERSION:
@@ -19,27 +16,31 @@ on:
       IMAGE_NAME:
         type: string
         required: true
-        description: The full name of the image to be built and pushed, format should be registry/(owner)/image_name.
+        description: The full name of the image to be built and published, format should be registry/(owner)/image_name.
       majorMinorPatch:
         type: string
         required: true
-        description: The major.minor.patch version of the image, you can use the git-version.yml workflow template to generate this.
+        description: The major.minor.patch version. Use the git-version workflow template to generate this.
       preReleaseLabel:
         type: string
         required: true
-        description: The pre-release label of the image, you can use the git-version.yml workflow template to generate this.
+        description: The pre-release label. Use the git-version workflow template to generate this.
       semVer:
         type: string
         required: true
-        description: The semantic version of the image, you can use the git-version.yml workflow template to generate this.
+        description: The semantic version. Use the git-version workflow template to generate this.
       assemblySemVer:
         type: string
         required: true
-        description: The assembly semantic version of the image, you can use the git-version.yml workflow template to generate this.
+        description: The assembly semantic version. Use the git-version workflow template to generate this.
       assemblySemFileVer:
         type: string
         required: true
-        description: The assembly semantic file version of the image, you can use the git-version.yml workflow template to generate this.
+        description: The assembly semantic file version. Use the git-version workflow template to generate this.
+      CR_REGISTRY:
+        type: string
+        default: docker.io
+        description: The container registry to authenticate with.
     secrets:
       CR_USERNAME:
         required: true
@@ -52,61 +53,18 @@ env:
   IS_MAIN: ${{ github.event.repository.default_branch == github.ref_name }}
 
 jobs:
-  build-push:
-    # Only run if IS_PUSH is true
-    if: github.event_name == 'push'
-    name: Build and push
-    runs-on: ubuntu-latest
-    permissions:
-      security-events: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@main
-      - name: Docker metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: |
-            ${{ inputs.IMAGE_NAME }}
-          tags: |
-            type=schedule,pattern=nightly
-            type=raw,enable=${{ env.IS_MAIN == 'true' }},value=nightly
-            type=raw,enable=${{ env.IS_MAIN == 'true' }},value=latest
-            type=raw,enable=${{ env.IS_MAIN == 'true' }},value=${{ inputs.majorMinorPatch }}
-            type=raw,enable=${{ env.IS_MAIN == 'false' }},value=${{ inputs.preReleaseLabel }}
-            type=raw,enable=${{ env.IS_MAIN == 'false' }},value=${{ inputs.semVer }}
-      - name: Setup dotnet
-        if: steps.meta.outputs.tags != '' && inputs.CSPROJ_NAME != ''
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ inputs.DOTNET_VERSION }}
-      - name: Dotnet build ${{ inputs.CSPROJ_NAME }}
-        if: steps.meta.outputs.tags != '' && inputs.CSPROJ_NAME != ''
-        run: |
-          dotnet publish "${{ inputs.CSPROJ_NAME }}/${{ inputs.CSPROJ_NAME }}.csproj" \
-          -c Release /p:UseAppHost=false \
-          /p:Version=${{ inputs.semVer }} \
-          /p:AssemblyVersion=${{ inputs.assemblySemVer }} \
-          /p:FileVersion=${{ inputs.assemblySemFileVer }}
-      - name: Set up Buildx
-        if: steps.meta.outputs.tags != ''
-        id: buildx
-        uses: docker/setup-buildx-action@v3
-        with:
-          platforms: linux/amd64,linux/arm64
-      - name: Login to container registry
-        if: steps.meta.outputs.tags != ''
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ inputs.CR_REGISTRY }}
-          username: ${{ secrets.CR_USERNAME }}
-          password: ${{ secrets.CR_PASSWORD }}
-      - name: Build and push ${{ inputs.CSPROJ_NAME }}
-        if: steps.meta.outputs.tags != ''
-        uses: docker/build-push-action@v6
-        with:
-          context: ./${{ inputs.CSPROJ_NAME }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          platforms: ${{ steps.buildx.outputs.platforms }}
-          push: true
+  build-publish:
+    uses: bvandevliet/Actions.Shared/.github/workflows/docker-build-publish.yml@master
+    with:
+      CSPROJ_NAME: ${{ inputs.CSPROJ_NAME }}
+      DOTNET_VERSION: ${{ inputs.DOTNET_VERSION }}
+      IMAGE_NAME: ${{ inputs.IMAGE_NAME }}
+      majorMinorPatch: ${{ inputs.majorMinorPatch }}
+      preReleaseLabel: ${{ inputs.preReleaseLabel }}
+      semVer: ${{ inputs.semVer }}
+      assemblySemVer: ${{ inputs.assemblySemVer }}
+      assemblySemFileVer: ${{ inputs.assemblySemFileVer }}
+      CR_REGISTRY: ${{ inputs.CR_REGISTRY }}
+    secrets:
+      CR_USERNAME: ${{ secrets.CR_USERNAME }}
+      CR_PASSWORD: ${{ secrets.CR_PASSWORD }}

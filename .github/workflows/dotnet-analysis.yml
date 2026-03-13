@@ -64,4 +64,4 @@ jobs:
         with:
           sarif_file: "trivy-fs.sarif"
       - name: Run all tests
-        run: dotnet test --no-restore --verbosity normal
+        run: dotnet test --no-restore --verbosity normal --logger trx

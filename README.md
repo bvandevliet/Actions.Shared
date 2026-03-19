@@ -26,6 +26,9 @@ jobs:
   analysis:
     name: Run code analysis and tests
     uses: bvandevliet/Actions.Shared/.github/workflows/dotnet-analysis.yml@master
+    with:
+      DOTNET_VERSION: 10
+      skipTrivyScan: true
   gitversion:
     needs: [analysis]
     name: Execute GitVersion and create tag

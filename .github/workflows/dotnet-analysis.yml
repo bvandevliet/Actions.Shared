@@ -12,9 +12,6 @@ on:
         default: false
         description: Set to false to skip the Trivy vulnerability scan.
 
-env:
-  IS_PUSH: ${{ github.event_name == 'push' }}
-
 jobs:
   analysis:
     name: Run code analysis and tests
@@ -28,13 +25,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@main
       - name: Initialize CodeQL
-        if: env.IS_PUSH == 'true' && github.actor != 'dependabot[bot]'
+        if: github.actor != 'dependabot[bot]'
         uses: github/codeql-action/init@v4
         with:
           languages: csharp
           build-mode: none
       - name: Perform CodeQL analysis
-        if: env.IS_PUSH == 'true' && github.actor != 'dependabot[bot]'
+        if: github.actor != 'dependabot[bot]'
         uses: github/codeql-action/analyze@v4
         with:
           category: "/language:csharp"
@@ -45,7 +42,7 @@ jobs:
       - name: Restore NuGet packages
         run: dotnet restore
       - name: Generate Trivy vulnerability report
-        if: inputs.skipTrivyScan != true
+        if: inputs.skipTrivyScan != true && github.actor != 'dependabot[bot]'
         uses: aquasecurity/trivy-action@master
         env:
           TRIVY_SKIP_DB_UPDATE: true
@@ -58,7 +55,7 @@ jobs:
           output: "trivy-fs.sarif"
           exit-code: 0
       - name: Upload Trivy scan results
-        if: inputs.skipTrivyScan != true
+        if: inputs.skipTrivyScan != true && github.actor != 'dependabot[bot]'
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: "trivy-fs.sarif"

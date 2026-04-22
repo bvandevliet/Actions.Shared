@@ -59,6 +59,7 @@ jobs:
   build-publish:
     name: Build and publish
     runs-on: ubuntu-latest
+    if: github.actor != 'dependabot[bot]'
     permissions:
       security-events: write
     steps:

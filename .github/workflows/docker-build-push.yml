@@ -11,7 +11,7 @@ on:
           Leave empty to skip dotnet build steps before building the image from the Dockerfile, e.g. for non-dotnet projects.
       DOTNET_VERSION:
         type: string
-        default: "8"
+        default: "10"
         description: The version of the dotnet SDK, see https://github.com/actions/setup-dotnet/tree/v4/#supported-version-syntax.
       IMAGE_NAME:
         type: string

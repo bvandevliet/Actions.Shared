@@ -5,7 +5,7 @@ on:
     inputs:
       DOTNET_VERSION:
         type: string
-        default: "8"
+        default: "10"
         description: The version of the dotnet SDK, see https://github.com/actions/setup-dotnet/tree/v4/#supported-version-syntax.
       skipTrivyScan:
         type: boolean

@@ -65,7 +65,7 @@ jobs:
           echo "GitVersion assemblySemFileVer: ${{ steps.gitversion.outputs.assemblySemFileVer }}"
       - name: Create Git tag
         if: ${{ inputs.createTag && (github.event_name == 'workflow_dispatch') || github.event_name == 'push' }}
-        continue-on-error: true
+        continue-on-error: true # avoid failing the workflow if the tag already exists
         run: |
           if [ "${{ env.IS_MAIN }}" == "true" ]; then
             git tag v${{ steps.gitversion.outputs.majorMinorPatch }}

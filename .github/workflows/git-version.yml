@@ -63,7 +63,7 @@ jobs:
           echo "GitVersion assemblySemVer: ${{ steps.gitversion.outputs.assemblySemVer }}"
           echo "GitVersion assemblySemFileVer: ${{ steps.gitversion.outputs.assemblySemFileVer }}"
       - name: Create Git tag
-        if: inputs.createTag
+        if: ${{ inputs.createTag && github.event_name == 'push' }}
         continue-on-error: true
         run: |
           if [ "${{ env.IS_MAIN }}" == "true" ]; then

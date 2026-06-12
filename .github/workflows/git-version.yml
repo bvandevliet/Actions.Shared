@@ -26,7 +26,7 @@ jobs:
   gitversion:
     name: Execute GitVersion and create tag
     runs-on: ubuntu-latest
-    if: ${{ !(github.event_name == 'pull_request' && github.actor == 'dependabot[bot]') }}
+    if: ${{ github.actor != 'dependabot[bot]' }}
     permissions:
       contents: write
     outputs:
@@ -64,7 +64,7 @@ jobs:
           echo "GitVersion assemblySemVer: ${{ steps.gitversion.outputs.assemblySemVer }}"
           echo "GitVersion assemblySemFileVer: ${{ steps.gitversion.outputs.assemblySemFileVer }}"
       - name: Create Git tag
-        if: ${{ inputs.createTag && (github.event_name == 'workflow_dispatch' || github.event_name == 'push') }}
+        if: ${{ inputs.createTag }}
         continue-on-error: true # avoid failing the workflow if the tag already exists
         run: |
           if [ "${{ env.IS_MAIN }}" == "true" ]; then

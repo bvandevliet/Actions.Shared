@@ -41,8 +41,19 @@ jobs:
         uses: actions/setup-dotnet@v6
         with:
           dotnet-version: ${{ inputs.DOTNET_VERSION }}
+      - name: Resolve solution file
+        id: solution
+        shell: bash
+        run: |
+          # Bare `dotnet restore`/`test` search the root for *.sln|*.slnx AND *.*proj;
+          # a root-level project file with a different base name than the solution
+          # (e.g. docker-compose.dcproj) trips MSB1011. Resolve the solution
+          # explicitly so that stray project file is never in the running.
+          shopt -s nullglob
+          files=(*.slnx *.sln)
+          echo "path=${files[0]:-}" >> "$GITHUB_OUTPUT"
       - name: Restore NuGet packages
-        run: dotnet restore
+        run: dotnet restore ${{ steps.solution.outputs.path }}
       - name: Generate Trivy vulnerability report
         if: inputs.skipTrivyScan != true && github.actor != 'dependabot[bot]'
         uses: aquasecurity/trivy-action@master
@@ -62,4 +73,4 @@ jobs:
         with:
           sarif_file: "trivy-fs.sarif"
       - name: Run all tests
-        run: dotnet test --no-restore --verbosity normal --logger trx
+        run: dotnet test ${{ steps.solution.outputs.path }} --no-restore --verbosity normal --logger trx

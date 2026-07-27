@@ -81,6 +81,20 @@ jobs:
             type=raw,enable=${{ env.IS_MAIN == 'false' }},value=${{ inputs.preReleaseLabel }}
             type=raw,enable=${{ env.IS_MAIN == 'true' }},value=nightly
             type=schedule,pattern=nightly
+      - name: Setup pnpm
+        if: steps.meta.outputs.tags != '' && hashFiles(format('{0}/package.json', inputs.CSPROJ_NAME)) != ''
+        uses: pnpm/action-setup@v6
+        with:
+          package_json_file: ${{ inputs.CSPROJ_NAME }}/package.json
+          version: latest
+      - name: Run pnpm install
+        if: steps.meta.outputs.tags != '' && hashFiles(format('{0}/package.json', inputs.CSPROJ_NAME)) != ''
+        working-directory: ${{ inputs.CSPROJ_NAME }}
+        run: pnpm install --frozen-lockfile
+      - name: Run pnpm publish
+        if: steps.meta.outputs.tags != '' && hashFiles(format('{0}/package.json', inputs.CSPROJ_NAME)) != ''
+        working-directory: ${{ inputs.CSPROJ_NAME }}
+        run: pnpm run publish
       - name: Setup dotnet
         if: steps.meta.outputs.tags != '' && inputs.CSPROJ_NAME != ''
         uses: actions/setup-dotnet@v6

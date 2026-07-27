@@ -65,6 +65,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@main
+        with:
+          ref: ${{ github.sha }}
       - name: Docker metadata
         id: meta
         uses: docker/metadata-action@v6
@@ -81,7 +83,7 @@ jobs:
             type=schedule,pattern=nightly
       - name: Setup dotnet
         if: steps.meta.outputs.tags != '' && inputs.CSPROJ_NAME != ''
-        uses: actions/setup-dotnet@v5
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: ${{ inputs.DOTNET_VERSION }}
       - name: Dotnet publish ${{ inputs.CSPROJ_NAME }}
@@ -92,6 +94,9 @@ jobs:
           /p:Version=${{ inputs.semVer }} \
           /p:AssemblyVersion=${{ inputs.assemblySemVer }} \
           /p:FileVersion=${{ inputs.assemblySemFileVer }}
+      - name: Set up QEMU
+        if: steps.meta.outputs.tags != ''
+        uses: docker/setup-qemu-action@v4
       - name: Set up Buildx
         id: buildx
         if: steps.meta.outputs.tags != ''

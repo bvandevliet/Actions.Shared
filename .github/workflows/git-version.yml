@@ -42,12 +42,11 @@ jobs:
           ref: ${{ github.sha }}
           fetch-depth: 0
       - name: Checkout GitVersion configuration
-        uses: actions/checkout@main
-        with:
-          repository: bvandevliet/Actions.Shared
-          sparse-checkout: GitVersion.yml
-          sparse-checkout-cone-mode: false
-          path: .actions-shared
+        # Anonymous clone: the job token cannot read this repo on Forgejo, and actions/checkout rejects an empty token.
+        run: |
+          git clone --depth 1 --branch master --filter=blob:none --no-checkout "${{ github.server_url }}/bvandevliet/Actions.Shared" .actions-shared
+          git -C .actions-shared sparse-checkout set --no-cone /GitVersion.yml
+          git -C .actions-shared checkout master
       - name: Setup dotnet
         uses: actions/setup-dotnet@v6
         with:
